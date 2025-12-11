@@ -1,0 +1,360 @@
+# 🗺️ **MeetingMind Roadmap: Codegeist 2025 (17 Days to Deadline)**
+
+## 📋 **Phase 0: Pre-Planning (Today - Day 1)**
+
+### **✅ IMMEDIATE ACTIONS (First 3 Hours)**
+
+1. **Register & Set Up**
+
+   - [ ] Sign up on Devpost (if not already)
+   - [ ] Join the hackathon: [codegeistxawr.devpost.com](https://codegeistxawr.devpost.com/)
+   - [ ] Form team (if any) - max 4 people per submission for swag
+
+2. **Environment Setup (2 Hours)**
+
+   - [ ] Install Forge CLI: `npm install -g @forge/cli`
+   - [ ] Create Atlassian Developer Account: [developer.atlassian.com](https://developer.atlassian.com)
+   - [ ] Set up test instances:
+     - Confluence (free - for meeting notes)
+     - Jira Cloud (free - for task creation)
+     - Optional: Connect to a calendar (Google/Microsoft)
+
+3. **Idea Finalization (1 Hour)**
+   - [ ] Choose: **MeetingMind** (Business Teams category)
+   - [ ] Write one-sentence pitch:
+         _"AI-powered meeting assistant that transforms chaotic meetings into structured action items, automatically creating Jira tasks and tracking decisions in Confluence."_
+
+---
+
+## **📅 WEEK 1: FOUNDATION (Days 1-7)**
+
+### **Day 1-2: Learning & Scaffolding**
+
+**Goal**: Understand Forge basics and create project skeleton
+
+**Tasks**:
+
+- [ ] Complete Forge "Getting Started" tutorial (3 hours)
+- [ ] Create new Forge app: `forge create meetingmind`
+- [ ] Set up basic manifest.yml with:
+  - Confluence macro (for meeting notes template)
+  - Jira issue panel (to show meeting-linked tasks)
+  - Function modules (backend logic)
+  - Storage (for meeting analytics)
+- [ ] Deploy to development environment: `forge deploy`
+- [ ] Install to test Confluence/Jira instance
+
+**Deliverable**: Basic Forge app running in dev environment
+
+### **Day 3-4: Core Integration Setup**
+
+**Goal**: Connect to Atlassian products
+
+**Tasks**:
+
+- [ ] Implement Confluence macro for meeting note-taking
+- [ ] Set up Jira API connection (create/read/update issues)
+- [ ] Create meeting note template with action item markers
+- [ ] Set up basic UI for meeting dashboard
+- [ ] Test: Create Confluence page → Extract dummy action items → Create Jira tasks
+
+**Deliverable**: Working integration between Confluence and Jira
+
+### **Day 5-6: Rovo Agent Foundation**
+
+**Goal**: Implement NLP processing for meeting notes
+
+**Tasks**:
+
+- [ ] Set up Rovo Dev environment
+- [ ] Create agent prompt template for action item extraction
+- [ ] Implement NLP detection for phrases like:
+  - "John will..." (action items)
+  - "We decided..." (decisions)
+  - "By Friday..." (deadlines)
+- [ ] Test agent with sample meeting notes
+- [ ] Connect agent to Forge functions
+
+**Deliverable**: Functional Rovo agent that can extract action items from text
+
+### **Day 7: Week 1 Review & Polish**
+
+**Goal**: Ensure foundation is solid
+
+**Tasks**:
+
+- [ ] Test Confluence macro in real meeting notes
+- [ ] Test Jira task creation with proper assignees
+- [ ] Fix any authentication/permission issues
+- [ ] Create basic error handling
+- [ ] Deploy updated version
+- [ ] Document what's working
+
+---
+
+## **📅 WEEK 2: FEATURE DEVELOPMENT (Days 8-14)**
+
+### **Day 8-9: Core Logic Implementation**
+
+**Goal**: Build the intelligent processing engine
+
+**Tasks**:
+
+- [ ] Implement name-to-user matching (e.g., "Sarah" → sarah@company.com)
+- [ ] Create deadline detection logic ("next week" → actual date)
+- [ ] Build decision tracking system
+- [ ] Add meeting analytics collection
+- [ ] Implement recurring meeting pattern recognition
+
+**Deliverable**: Smart processing engine working
+
+### **Day 10-11: Automation & Workflows**
+
+**Goal**: Make it actually DO things automatically
+
+**Tasks**:
+
+- [ ] Auto-create Jira tasks with proper:
+  - Descriptions (from meeting context)
+  - Assignees (matched to Atlassian users)
+  - Deadlines (calculated from text)
+  - Labels/priority (based on meeting type)
+- [ ] Auto-tag decisions in Confluence
+- [ ] Implement follow-up scheduler (create follow-up tasks)
+- [ ] Add notification system (Slack/email for new action items)
+- [ ] Create meeting summary emails
+
+**Deliverable**: Full automated workflow from meeting notes to execution
+
+### **Day 12-13: UI/UX Polish & Analytics**
+
+**Goal**: Make it look professional and insightful
+
+**Tasks**:
+
+- [ ] Design clean meeting dashboard with Forge UI Kit
+- [ ] Add visualizations:
+  - Action item completion rates
+  - Meeting effectiveness scores
+  - Time saved metrics
+- [ ] Implement meeting note template with smart fields
+- [ ] Add drag-and-drop task prioritization
+- [ ] Mobile-responsive design
+
+**Deliverable**: Polished, production-ready UI with analytics
+
+### **Day 14: Bonus Prize Optimization**
+
+**Goal**: Ensure eligibility for extra prizes
+
+**Tasks**:
+
+- [ ] Verify "Runs on Atlassian" requirements met (Confluence + Jira = 2+ products)
+- [ ] Document Rovo agent usage (screenshots, code snippets)
+- [ ] Create social media post about Rovo Dev usage (required for bonus)
+- [ ] Test installation link works for fresh users
+- [ ] Prepare bonus prize submission materials
+
+**Deliverable**: All bonus prize checkboxes completed
+
+---
+
+## **📅 WEEK 3: POLISH & SUBMISSION (Days 15-17)**
+
+### **Day 15: Testing & Debugging**
+
+**Goal**: Eliminate bugs and edge cases
+
+**Tasks**:
+
+- [ ] Test with various meeting formats (formal, informal, brainstorming)
+- [ ] Test with different languages/formats
+- [ ] Test name matching with common variations
+- [ ] Performance testing (response times for large notes)
+- [ ] Security review (ensure no data leaks)
+- [ ] Get feedback from 2-3 business users
+
+**Deliverable**: Stable, reliable app
+
+### **Day 16: Demo Video Production**
+
+**Goal**: Create compelling 5-minute demo
+
+**Tasks**:
+
+- [ ] Write script (follow this structure):
+  ```
+  0:00-0:30 - Problem: Chaotic meeting with lost action items
+  0:30-1:00 - Solution intro: MeetingMind Confluence template
+  1:00-2:30 - Live demo: Take meeting notes → AI extracts 5 action items
+  2:30-3:30 - Magic: Watch Jira auto-populate with perfectly assigned tasks
+  3:30-4:00 - Analytics: Show dashboard - "92% completion rate (was 58%)"
+  4:00-4:30 - Impact: Calculate time saved - "40 hours/month saved"
+  4:30-5:00 - Call to action
+  ```
+- [ ] Record screen (use Loom or OBS)
+- [ ] Edit video (add captions, highlights, professional transitions)
+- [ ] Upload to YouTube (unlisted)
+- [ ] Create thumbnail with "Codegeist 2025" branding
+
+**Deliverable**: Professional 5-minute demo video
+
+### **Day 17: Final Submission (DEADLINE DAY)**
+
+**Goal**: Submit before 7:00 PM GMT+1
+
+**Tasks**:
+**Morning (9:00 AM - 12:00 PM)**:
+
+- [ ] Final deployment: `forge deploy`
+- [ ] Generate installation link
+- [ ] Test installation on fresh account
+- [ ] Update README/documentation
+
+**Afternoon (1:00 PM - 5:00 PM)**:
+
+- [ ] Complete Devpost submission form:
+  - Project name: "MeetingMind"
+  - Tagline: "AI-powered meeting assistant for business teams"
+  - Installation link
+  - Video URL
+  - App ID (from Developer Console)
+  - Category: "Apps for Business Teams"
+  - Bonus prize materials attached (Rovo usage, social media post)
+  - Team members listed
+- [ ] Double-check all requirements
+- [ ] Take screenshots for submission
+- [ ] Write compelling project description
+
+**Final Hour (5:00 PM - 6:30 PM GMT+1)**:
+
+- [ ] Submit!
+- [ ] Keep 30-minute buffer for last-minute issues
+- [ ] Celebrate 🎉
+
+---
+
+## **🛠️ Daily Time Commitment Guide**
+
+| Day          | Hours Needed   | Focus Area          |
+| ------------ | -------------- | ------------------- |
+| Weekdays     | 3-4 hours/day  | Core development    |
+| Weekend 1    | 6-8 hours/day  | Learning & setup    |
+| Weekend 2    | 8-10 hours/day | Feature building    |
+| Final 3 days | 4-6 hours/day  | Polish & submission |
+
+**Total Estimated Time**: ~60-80 hours
+
+---
+
+## **⚠️ Critical Milestones & Checkpoints**
+
+### **By Day 3**: Should have Confluence macro working
+
+### **By Day 7**: Should have basic action item extraction → Jira creation
+
+### **By Day 10**: Should have smart NLP processing (name/date detection)
+
+### **By Day 14**: Should have full analytics dashboard
+
+### **By Day 16**: Video completed and uploaded
+
+### **Day 17**: SUBMISSION DAY - start early!
+
+---
+
+## **🎯 Success Checklist (Before Submitting)**
+
+### **Technical Requirements**:
+
+- [ ] App built on Forge
+- [ ] Integrates Confluence + Jira (2+ products)
+- [ ] Uses Rovo agent with action modules for NLP
+- [ ] Installation link works
+- [ ] App ID included
+
+### **Submission Requirements**:
+
+- [ ] Demo video ≤5 minutes, public/unlisted
+- [ ] Category: Business Teams specified
+- [ ] Bonus prize documentation included
+- [ ] Social media post link (for Rovo Dev bonus)
+- [ ] All team members registered
+
+### **Quality Checks**:
+
+- [ ] Name matching works reliably
+- [ ] Date detection handles "next week", "by Friday" etc.
+- [ ] UI is clean and professional
+- [ ] Video is engaging and clear
+- [ ] Documentation is complete
+- [ ] Tested with fresh install
+
+---
+
+## **🚀 Pro Tips for Winning with MeetingMind**
+
+1. **Focus on Business Pain Points** - Emphasize:
+
+   - "40% of meeting outcomes are forgotten" (Harvard Business Review stat)
+   - Average manager spends 23 hours/week in meetings
+   - 37% of action items never get done
+
+2. **Show ROI in Demo** - Calculate:
+
+   - Time saved per meeting
+   - Increased accountability
+   - Reduced "meeting about meetings"
+
+3. **Leverage the "Pit Crew" Metaphor** - Frame as:
+
+   - "Business team pit crew"
+   - "Zero-time handoff from meeting to execution"
+   - "Precision task assignment"
+
+4. **Make it Visually Appealing** - Use:
+
+   - Clean meeting templates
+   - Color-coded priority system
+   - Progress tracking visuals
+
+5. **Highlight Unique Features**:
+   - NLP understanding of natural language
+   - Smart user matching
+   - Automated follow-up system
+
+---
+
+## **📊 Key Metrics to Highlight**
+
+1. **Time Savings**: "Saves 30 minutes per meeting in follow-up work"
+2. **Completion Rate**: "Improves action item completion from 58% to 92%"
+3. **Adoption Ease**: "1-click setup, works with existing Confluence/Jira"
+4. **ROI**: "Pays for itself in 2 weeks for a 10-person team"
+
+---
+
+## **🎯 Final Recommendation for MeetingMind**
+
+**Why MeetingMind Could Win**:
+
+1. **Universal Problem**: Every business team has meeting inefficiencies
+2. **Clear Value Proposition**: Immediate time savings visible
+3. **Strong Demo Potential**: Before/after comparison is dramatic
+4. **Business Category Advantage**: Less technical competition than Software Teams category
+
+**Key Differentiators**:
+
+- Not just transcription (like Otter.ai) - actually creates tasks
+- Not just task management (like Asana) - understands meeting context
+- Native Atlassian integration - no context switching
+
+**Risk Mitigation**:
+
+- Start with simple pattern matching (if...will...by...)
+- Enhance with AI where it adds most value
+- Have fallback manual override for everything
+
+**Remember**: Business teams are a growing market for Atlassian. A tool that makes their meetings more effective has **huge adoption potential**.
+
+**You've got this! Build something that solves a real pain point for thousands of teams.** 🏁🚀

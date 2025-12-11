@@ -1,0 +1,181 @@
+# Codegeist 2025: Atlassian Williams Racing Edition - Complete Requirements Summary
+
+## 🏁 **Core Hackathon Details**
+
+- **Theme**: "Accelerate Innovation" - F1/pit crew metaphor
+- **Platform**: Must build on **Atlassian Forge** (serverless app development platform)
+- **Deadline**: December 22, 2025 @ 7:00 PM GMT+1
+- **Prize Pool**: $120,000+ total
+- **Participants**: 2,507+ (as of Dec 5, 2025)
+- **Managed by**: Devpost
+- **Sponsor**: Atlassian with Williams Racing partnership
+
+## 🎯 **Who Can Participate**
+
+- ✅ Above legal age of majority in country of residence
+- ❌ **Excluded**: Specific countries/territories (check full rules - typically includes embargoed countries)
+- ✅ Teams allowed (no specified max size)
+- ✅ Organizations allowed
+
+## 🛠️ **What You MUST Build**
+
+**Build an app using Atlassian Forge that integrates with at least ONE of:**
+
+- Jira
+- Confluence
+- Jira Service Management
+- Bitbucket
+- Compass
+
+**Choose ONE category:**
+
+1. **Apps for Software Teams** - Help developers work like pit crews
+2. **Apps for Business Teams** - Help marketing, sales, HR, finance, etc. move faster
+3. **Apps for Specialized Industries** - Healthcare, banking, automotive, manufacturing, etc.
+
+## 📤 **Submission Requirements (MANDATORY)**
+
+1. **Access Link**: Installation link for judges to test your app
+
+   - _How_: Create via "Start sharing your app" in Forge
+   - Judges must be able to install and test
+
+2. **Demo Video**: ≤5 minutes demonstrating:
+
+   - Your working project
+   - Any bonus prize specifics
+   - **Format**: YouTube or Vimeo, public/unlisted
+
+3. **Category Selection**: Specify which category you're entering
+
+4. **Bonus Prize Materials**: If applicable:
+
+   - For **Runs on Atlassian**: Explain how you meet requirements
+   - For **Rovo Apps**: Show use of `rovo.agent` and `action` modules
+   - For **Rovo Dev**: Include:
+     - Summary of how you used Rovo Dev
+     - Link to social media post about your use of Rovo Dev
+
+5. **App ID**: From Atlassian Developer Console
+6. **Complete Devpost submission form** before deadline
+
+## ⚖️ **Judging Criteria (100% of Main Prizes)**
+
+1. **Quality of the Idea** (Weight: Not specified, but significant)
+
+   - Creativity and originality
+   - Novelty of approach
+
+2. **Implementation of the Idea**
+
+   - How well the idea was executed
+   - Technical implementation quality
+   - User experience
+
+3. **Potential Impact**
+   - How many Atlassian users it can help
+   - Scale of problem solved
+   - Practical usefulness
+
+## 💰 **Prize Breakdown**
+
+### **Main Prizes (3 winners per category = 9 total winners)**
+
+- **1st Place** (3 winners): $15,000 each
+
+  - - 2 tickets to TEAM 2026 (AMER) - travel NOT included
+  - - Recognition at Atlas Camp 2026
+  - - Signed Atlassian Williams Racing swag
+
+- **2nd Place** (3 winners): $8,000 each
+
+  - - Featured on Atlassian blog
+
+- **3rd Place** (3 winners): $5,000 each
+  - - Featured on Atlassian blog
+
+### **Bonus Prizes (Can be won IN ADDITION to main prizes)**
+
+- **Best Runs on Atlassian Apps** (6 winners): $2,000 each
+
+  - Must meet Runs on Atlassian program requirements
+
+- **Best Rovo Apps** (6 winners): $2,000 each
+
+  - Must use Forge `rovo.agent` and `action` modules to configure agents
+
+- **Best App built using Rovo Dev** (6 winners): $2,000 each
+  - Must be built using Rovo Dev platform
+  - Requires summary + social media post link
+
+### **Participation Prize**
+
+- **Atlassian Developer Swag Pack** (300 winners)
+  - First-come, first-served basis
+  - Max 4 per submission
+  - While supplies last
+
+## 🎪 **Bonus Prize Specifics**
+
+### **Runs on Atlassian Program Requirements:**
+
+- Apps that extend Atlassian products
+- Meet quality and security standards
+- Provide value to users
+
+### **Rovo Apps Requirements:**
+
+- Use `rovo.agent` module for AI agents
+- Use `action` modules for task execution
+- Configure agents to perform specific tasks
+
+### **Rovo Dev Requirements:**
+
+- Built using Rovo Dev platform
+- Social media post about usage required
+
+## 📅 **Key Dates & Timeline**
+
+- **Submission Deadline**: Dec 22, 2025 @ 7:00 PM GMT+1
+- **Judging Period**: Likely December 2025 - January 2026
+- **Winners Announced**: Not specified, but typically 4-8 weeks after deadline
+
+## 🚫 **Important Restrictions**
+
+- Must be original work created for this hackathon
+- Cannot violate third-party rights
+- Must comply with Atlassian's developer terms
+- Must be publicly shareable (for judging)
+
+## 🏆 **Winning Strategy Tips**
+
+1. **Theme Alignment**: Connect to F1/pit crew/speed metaphors
+2. **Multiple Integrations**: Use more than one Atlassian product
+3. **Bonus Optimization**: Design for Rovo + Runs on Atlassian eligibility
+4. **Polish Matters**: Clean UI, smooth UX, professional demo video
+5. **Impact Focus**: Solve a real, painful problem for many users
+6. **Clear Story**: Problem → Solution → Impact narrative in demo
+
+## 🔗 **Essential Resources**
+
+- **Forge Documentation**: developer.atlassian.com/platform/forge
+- **Rovo Dev**: developer.atlassian.com/rovo/dev
+- **Devpost Submission Page**: codegeistxawr.devpost.com
+- **Atlassian Developer Community**: community.developer.atlassian.com
+
+## ⚡ **Quick Checklist Before Submitting**
+
+- [ ] App built on Forge
+- [ ] Integrates ≥1 Atlassian product
+- [ ] Installation link works for judges
+- [ ] Demo video ≤5 mins, uploaded, public
+- [ ] Category selected
+- [ ] Bonus prize materials included (if applicable)
+- [ ] App ID included
+- [ ] Submission form complete
+- [ ] All team members registered
+- [ ] Tested on fresh install
+
+---
+
+**Bottom Line**: Build a **functional Forge app** that solves a real problem for Atlassian users, **demo it professionally** in a ≤5 min video, and **optimize for bonus prizes** by using Rovo and following best practices. The judges care about **creativity, execution quality, and potential impact**.
