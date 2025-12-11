@@ -7,6 +7,7 @@ const App = () => {
   const [notes, setNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState(null);
+  const [lastProcessedNotes, setLastProcessedNotes] = useState('');
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -16,6 +17,9 @@ const App = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setNotes('');
+    setResult(null);
+    setProcessing(false);
+    setLastProcessedNotes('');
   };
 
   const handleSubmit = async () => {
@@ -31,9 +35,7 @@ const App = () => {
       const response = await invoke('createJiraTasks', { notes });
       setResult(response);
       if (response.success) {
-        setTimeout(() => {
-          closeModal();
-        }, 3000);
+        setLastProcessedNotes(notes);
       }
     } catch (error) {
       setResult({ success: false, message: 'Error creating tasks' });
@@ -69,7 +71,7 @@ const App = () => {
 - Team decided to use React for the frontend
 - Mike to schedule follow-up meeting next week"
                   value={notes}
-                  onChange={setNotes}
+                  onChange={(e) => setNotes(e.target.value)}
                   minimumRows={8}
                   resize="vertical"
                 />
@@ -81,7 +83,7 @@ const App = () => {
                       <Stack space="small">
                         <Text>Created tasks:</Text>
                         {result.tasks.map((task, index) => (
-                          <Text key={index}>• {task.key}: {task.summary}</Text>
+                          <Text key={index}>• {task.key}: {task.summary} → {task.assignee} • Due: {task.dueDate} • {task.priority} {task.type}</Text>
                         ))}
                       </Stack>
                     )}
@@ -94,10 +96,15 @@ const App = () => {
               <Button
                 onClick={handleSubmit}
                 appearance="primary"
-                isDisabled={processing || !notes.trim()}
+                isDisabled={processing || !notes.trim() || (notes === lastProcessedNotes && result?.success)}
               >
                 {processing ? 'Creating Tasks...' : 'Create Jira Tasks'}
               </Button>
+              {result && result.success && (
+                <Button onClick={closeModal} appearance="primary">
+                  Close
+                </Button>
+              )}
             </ModalFooter>
           </Modal>
         )}
