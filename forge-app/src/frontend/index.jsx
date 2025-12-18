@@ -46,13 +46,13 @@ const App = () => {
 
   return (
     <Stack space="medium">
-      <Heading size="medium">MeetingMind - Transform Meeting Notes into Tasks</Heading>
+      <Heading size="medium">MeetingMind - Powered by Williams Racing</Heading>
       <Text>Transform your meeting notes into actionable Jira tasks automatically.</Text>
       <Button
         onClick={openModal}
         appearance="primary"
       >
-        Open Meeting Notes Input
+        Transform Meeting Notes
       </Button>
       
       <ModalTransition>
@@ -63,7 +63,7 @@ const App = () => {
             </ModalHeader>
             <ModalBody>
               <Stack space="medium">
-                <Text>Paste or type your meeting notes below. Lines starting with "-" will become Jira tasks.</Text>
+                <Text>Paste your meeting notes below. AI will extract action items automatically.</Text>
                 <TextArea
                   placeholder="Example:
 - John to review the Q4 budget by Friday
@@ -79,11 +79,12 @@ const App = () => {
                 {result && (
                   <Stack space="small">
                     <Text>{result.success ? `✅ ${result.message}` : `❌ ${result.message}`}</Text>
+
                     {result.success && result.tasks && result.tasks.length > 0 && (
                       <Stack space="small">
                         <Text>Created tasks:</Text>
                         {result.tasks.map((task, index) => (
-                          <Text key={index}>• {task.key}: {task.summary} → {task.assignee} • Due: {task.dueDate} • {task.priority} {task.type}</Text>
+                          <Text key={index}>• {task.key}: {task.summary} → {task.assignee} • Start: {task.startDate} • Due: {task.dueDate} • {task.priority} {task.type}</Text>
                         ))}
                       </Stack>
                     )}

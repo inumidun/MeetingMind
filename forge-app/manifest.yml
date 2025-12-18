@@ -10,6 +10,7 @@ modules:
   function:
     - key: resolver
       handler: index.handler
+
 resources:
   - key: main
     path: src/frontend/index.jsx
@@ -17,6 +18,7 @@ permissions:
   scopes:
     - read:confluence-content.all
     - write:confluence-content
+    - write:custom-content:confluence
     - read:confluence-space.summary
     - read:confluence-user
     - write:jira-work
