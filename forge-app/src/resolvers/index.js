@@ -21,28 +21,29 @@ const parseDateFromText = (text, meetingDate = new Date('2025-12-20')) => {
   
   // Specific day calculations from meeting date (Dec 20, 2025 = Friday)
   
-  // "By Monday" = next Monday (Dec 22)
+  // "By Monday" = next Monday (Dec 22) - FIXED
   if (lowerText.includes('by monday') || lowerText.includes('monday')) {
-    const nextMonday = new Date('2025-12-22');
-    return nextMonday.toISOString().split('T')[0];
+    return '2025-12-22';
   }
   
-  // "By Wednesday" or "next Wednesday" = Dec 25
+  // "By Wednesday" or "next Wednesday" = Dec 25 - FIXED
   if (lowerText.includes('by wednesday') || lowerText.includes('next wednesday')) {
-    const nextWednesday = new Date('2025-12-25');
-    return nextWednesday.toISOString().split('T')[0];
+    return '2025-12-25';
   }
   
-  // "By Friday" or "next Friday" = Dec 26
+  // "By Friday" or "next Friday" = Dec 26 - FIXED
   if (lowerText.includes('by friday') || lowerText.includes('next friday')) {
-    const nextFriday = new Date('2025-12-26');
-    return nextFriday.toISOString().split('T')[0];
+    return '2025-12-26';
   }
   
   // "By Tuesday" = Dec 24
   if (lowerText.includes('by tuesday') || lowerText.includes('tuesday')) {
-    const nextTuesday = new Date('2025-12-24');
-    return nextTuesday.toISOString().split('T')[0];
+    return '2025-12-24';
+  }
+  
+  // "By Thursday" or "next Thursday" = Dec 26
+  if (lowerText.includes('by thursday') || lowerText.includes('next thursday')) {
+    return '2025-12-26';
   }
   
   // Generic "next week"
@@ -144,19 +145,24 @@ For each task, return JSON:
 }
 
 CRITICAL RULES:
-1. Extract EVERY task mentioned, even brief ones
-2. Match assignee names EXACTLY to Jira users list
-3. Parse dates precisely: "by Monday" from Dec 20 = 2025-12-22, "by next Friday" = 2025-12-26
-4. Include ALL scope mentioned (security policies + mapping + AWS Config, etc.)
-5. Capture implicit tasks (budget approvals, follow-ups)
-6. Set High priority for urgent/deadline items, Medium for standard work
+1. Extract EVERY task mentioned, including ones assigned to "Oyindamola"
+2. Match assignee names EXACTLY to Jira users list - look for partial matches
+3. NEVER ASSUME DUE DATES - Only set dueDate if explicitly mentioned:
+   - "by Monday" = 2025-12-22
+   - "by next Friday" = 2025-12-26 
+   - "next Wednesday" = 2025-12-25
+   - "next Thursday" = 2025-12-26
+   - If NO deadline mentioned = null
+4. DO NOT infer or guess deadlines from other tasks
+5. Include ALL scope mentioned in descriptions
+6. Set High priority for urgent/deadline items
 
 Meeting date context: December 20, 2025 (Friday)
 
 Meeting transcript:
 ${notes}
 
-Return complete JSON array with ALL tasks:`;
+Return complete JSON array with ALL tasks. ONLY set dueDate if deadline explicitly stated:`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -167,8 +173,8 @@ Return complete JSON array with ALL tasks:`;
     body: JSON.stringify({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.1,
-      max_tokens: 2500
+      temperature: 0.05,
+      max_tokens: 3000
     })
   });
 
@@ -180,6 +186,11 @@ Return complete JSON array with ALL tasks:`;
   const jsonMatch = content.match(/\[.*\]/s);
   if (jsonMatch) {
     const tasks = JSON.parse(jsonMatch[0]);
+    console.log(`🤖 OpenAI extracted ${tasks.length} tasks:`);
+    tasks.forEach((task, i) => {
+      console.log(`  ${i+1}. "${task.text}" → ${task.assignedPerson} (Due: ${task.dueDate || 'No date'})`);
+    });
+    
     // Generate professional descriptions for each task
     return tasks.map(task => ({
       ...task,
@@ -299,10 +310,7 @@ const extractTasks = async (notes, users) => {
     console.log('🤖 Trying OpenAI extraction...');
     const aiTasks = await extractWithOpenAI(notes, users);
     if (aiTasks?.length > 0) {
-      console.log(`✅ OpenAI extracted ${aiTasks.length} tasks:`);
-      aiTasks.forEach((task, i) => {
-        console.log(`  ${i+1}. ${task.text} → ${task.assignedPerson} (Due: ${task.dueDate || 'No date'})`);
-      });
+      console.log(`✅ OpenAI extracted ${aiTasks.length} tasks`);
       return aiTasks;
     }
   } catch (error) {

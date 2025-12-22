@@ -5,8 +5,9 @@ modules:
       render: native
       resolver:
         function: resolver
-      title: MeetingMind
-      description: Transform meeting notes into Jira tasks automatically
+      title: MeetingMind - Meeting Intelligence
+      description: Transform meeting notes into Jira tasks with AI-powered extraction
+  
   function:
     - key: resolver
       handler: index.handler

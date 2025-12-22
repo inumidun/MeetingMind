@@ -8,7 +8,7 @@ MeetingMind is an Atlassian Forge application that uses artificial intelligence 
 
 ## ✨ Key Features
 
-- **🤖 AI-Powered Extraction**: Three-tier AI system (OpenAI GPT-3.5-turbo → Rovo Agent → Pattern Matching)
+- **🤖 AI-Powered Extraction**: Two-tier AI system (OpenAI GPT-3.5-turbo → Pattern Matching)
 - **🌍 Multi-Language Support**: English, Spanish, French, and German
 - **👥 Smart User Assignment**: Automatically assigns tasks to team members mentioned in meetings
 - **📅 Date Intelligence**: Parses natural language dates ("by Friday", "next week")
@@ -118,11 +118,10 @@ All tasks are created in the original meeting language while maintaining proper 
 
 ## 🏗️ Architecture
 
-### Three-Tier AI System
+### Two-Tier AI System
 
 1. **OpenAI GPT-3.5-turbo** (Primary): Advanced natural language understanding
-2. **Atlassian Rovo Agent** (Backup): Native Atlassian AI integration
-3. **Pattern Matching** (Fallback): Deterministic extraction that always works
+2. **Pattern Matching** (Fallback): Deterministic extraction that always works
 
 ### Data Flow
 
@@ -198,7 +197,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Atlassian Forge platform for serverless app hosting
 - OpenAI for advanced natural language processing
-- Williams Racing for partnership and branding inspiration
 
 ---
 

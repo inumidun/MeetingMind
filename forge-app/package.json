@@ -1,11 +1,17 @@
 {
-  "name": "confluence-macro-ui-kit",
-  "version": "1.1.29",
+  "name": "meetingmind-forge-app",
+  "version": "1.0.0",
+  "description": "AI-powered meeting task automation for Atlassian Forge",
   "main": "index.js",
   "license": "MIT",
   "private": true,
+  "author": "MeetingMind Team",
+  "keywords": ["atlassian", "forge", "jira", "confluence", "ai", "meeting", "automation"],
   "scripts": {
-    "lint": "eslint src/**/*"
+    "lint": "eslint src/**/*",
+    "deploy": "forge deploy",
+    "install:confluence": "forge install --product confluence",
+    "install:jira": "forge install --product jira"
   },
   "devDependencies": {
     "eslint": "^8.56.0",
