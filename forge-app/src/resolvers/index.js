@@ -56,6 +56,83 @@ const parseDateFromText = (text, meetingDate = new Date('2025-12-20')) => {
   return null;
 };
 
+// Calculate meeting effectiveness score
+const calculateMeetingScore = (tasks) => {
+  const totalTasks = tasks.length;
+  const assignedTasks = tasks.filter(t => t.assignee && !t.assignee.includes('Not in Jira')).length;
+  const datedTasks = tasks.filter(t => t.dueDate && t.dueDate !== 'No due date').length;
+  const highPriorityTasks = tasks.filter(t => t.priority === 'High').length;
+  
+  const assignmentScore = Math.round((assignedTasks / totalTasks) * 100);
+  const dateScore = Math.round((datedTasks / totalTasks) * 100);
+  const overallScore = Math.round(((assignedTasks + datedTasks) / (totalTasks * 2)) * 100);
+  
+  return {
+    totalTasks,
+    assignedTasks,
+    datedTasks,
+    highPriorityTasks,
+    assignmentScore,
+    dateScore,
+    overallScore,
+    effectiveness: overallScore >= 80 ? 'Excellent' : overallScore >= 60 ? 'Good' : 'Needs Improvement'
+  };
+};
+
+// Generate smart suggestions based on task analysis
+const generateSmartSuggestions = (tasks) => {
+  const suggestions = [];
+  
+  const unassignedTasks = tasks.filter(t => t.assignee.includes('Not in Jira')).length;
+  const undatedTasks = tasks.filter(t => t.dueDate === 'No due date').length;
+  const sameDayTasks = {};
+  
+  // Count tasks per due date
+  tasks.forEach(task => {
+    if (task.dueDate && task.dueDate !== 'No due date') {
+      sameDayTasks[task.dueDate] = (sameDayTasks[task.dueDate] || 0) + 1;
+    }
+  });
+  
+  // Generate suggestions
+  if (unassignedTasks > 0) {
+    suggestions.push({
+      type: 'warning',
+      icon: '👥',
+      message: `${unassignedTasks} task${unassignedTasks > 1 ? 's' : ''} assigned to people not in Jira. Consider reassigning to existing team members.`
+    });
+  }
+  
+  if (undatedTasks > 0) {
+    suggestions.push({
+      type: 'info',
+      icon: '📅',
+      message: `${undatedTasks} task${undatedTasks > 1 ? 's' : ''} without due dates. Consider adding deadlines for better tracking.`
+    });
+  }
+  
+  Object.entries(sameDayTasks).forEach(([date, count]) => {
+    if (count > 3) {
+      const formattedDate = new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      suggestions.push({
+        type: 'warning',
+        icon: '⚠️',
+        message: `${count} tasks due on ${formattedDate}. Consider spreading deadlines to avoid bottlenecks.`
+      });
+    }
+  });
+  
+  if (suggestions.length === 0) {
+    suggestions.push({
+      type: 'success',
+      icon: '✅',
+      message: 'Great job! Tasks are well-distributed with clear assignments and deadlines.'
+    });
+  }
+  
+  return suggestions;
+};
+
 // Enhanced professional description generator
 const generateProfessionalDescription = (taskTitle, originalContext, dueDate, assignee) => {
   // Generate comprehensive professional description
@@ -351,10 +428,16 @@ resolver.define('extractTasks', async (req) => {
       };
     });
 
+    // Calculate meeting effectiveness and generate suggestions
+    const meetingScore = calculateMeetingScore(formattedTasks);
+    const suggestions = generateSmartSuggestions(formattedTasks);
+
     return {
       success: true,
       tasks: formattedTasks,
-      message: `Extracted ${formattedTasks.length} task${formattedTasks.length === 1 ? '' : 's'}`
+      meetingScore,
+      suggestions,
+      message: `Extracted ${formattedTasks.length} task${formattedTasks.length === 1 ? '' : 's'} • Meeting Effectiveness: ${meetingScore.effectiveness} (${meetingScore.overallScore}%)`
     };
   } catch (error) {
     return { success: false, message: `Error: ${error.message}` };

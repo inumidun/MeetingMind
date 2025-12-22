@@ -7,7 +7,7 @@ modules:
         function: resolver
       title: MeetingMind - Meeting Intelligence
       description: Transform meeting notes into Jira tasks with AI-powered extraction
-  
+
   function:
     - key: resolver
       handler: index.handler
@@ -29,7 +29,7 @@ permissions:
   external:
     fetch:
       backend:
-        - 'https://api.openai.com'
+        - address: https://api.openai.com
 app:
   runtime:
     name: nodejs22.x

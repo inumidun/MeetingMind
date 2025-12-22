@@ -682,6 +682,8 @@ const App = () => {
   const [lastProcessedNotes, setLastProcessedNotes] = useState('');
   const [analytics, setAnalytics] = useState(null);
   const [extractedTasks, setExtractedTasks] = useState(null);
+  const [meetingScore, setMeetingScore] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
   const [showPreview, setShowPreview] = useState(false);
 
   const loadAnalytics = async () => {
@@ -727,6 +729,8 @@ const App = () => {
       const response = await invoke('extractTasks', { notes });
       if (response.success) {
         setExtractedTasks(response.tasks);
+        setMeetingScore(response.meetingScore);
+        setSuggestions(response.suggestions || []);
         setShowPreview(true);
       } else {
         setResult({ success: false, message: response.message || 'Failed to extract tasks' });
@@ -758,6 +762,8 @@ const App = () => {
 
   const handleDiscard = () => {
     setExtractedTasks(null);
+    setMeetingScore(null);
+    setSuggestions([]);
     setShowPreview(false);
     setResult(null);
   };
@@ -913,6 +919,46 @@ const App = () => {
                       </Text>
                     </Box>
                     
+                    {/* Meeting Effectiveness Score */}
+                    {meetingScore && (
+                      <Box xcss={{
+                        background: meetingScore.effectiveness === 'Excellent' ? '#e8f5e9' : 
+                                   meetingScore.effectiveness === 'Good' ? '#fff3e0' : '#ffebee',
+                        padding: 'space.400',
+                        borderRadius: 'border.radius.200',
+                        border: `2px solid ${meetingScore.effectiveness === 'Excellent' ? '#4caf50' : 
+                                             meetingScore.effectiveness === 'Good' ? '#ff9800' : '#f44336'}`
+                      }}>
+                        <Text xcss={{ fontWeight: '700', fontSize: '1.1em', marginBottom: 'space.200' }}>
+                          📊 Meeting Effectiveness: {meetingScore.effectiveness} ({meetingScore.overallScore}%)
+                        </Text>
+                        <Box xcss={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'space.200', fontSize: '0.9em' }}>
+                          <Text>📝 {meetingScore.totalTasks} tasks</Text>
+                          <Text>👥 {meetingScore.assignedTasks} assigned ({meetingScore.assignmentScore}%)</Text>
+                          <Text>📅 {meetingScore.datedTasks} dated ({meetingScore.dateScore}%)</Text>
+                        </Box>
+                      </Box>
+                    )}
+                    
+                    {/* Smart Suggestions */}
+                    {suggestions && suggestions.length > 0 && (
+                      <Stack space="small">
+                        <Text xcss={{ fontWeight: '700' }}>💡 Smart Suggestions:</Text>
+                        {suggestions.map((suggestion, idx) => (
+                          <Box key={idx} xcss={{
+                            background: suggestion.type === 'success' ? '#e8f5e9' : 
+                                       suggestion.type === 'warning' ? '#fff3e0' : '#e3f2fd',
+                            padding: 'space.200',
+                            borderRadius: 'border.radius.100',
+                            border: `1px solid ${suggestion.type === 'success' ? '#4caf50' : 
+                                                 suggestion.type === 'warning' ? '#ff9800' : '#2196f3'}`
+                          }}>
+                            <Text>{suggestion.icon} {suggestion.message}</Text>
+                          </Box>
+                        ))}
+                      </Stack>
+                    )}
+                    
                     <Stack space="small">
                       {extractedTasks?.map((task, index) => (
                         <Box key={index} xcss={{
@@ -926,9 +972,60 @@ const App = () => {
                           <Text>👤 Assignee: {task.assignee}</Text>
                           <Text>📅 Due: {task.dueDate}</Text>
                           <Text>⚡ Priority: {task.priority}</Text>
+                          {task.assignee.includes('Not in Jira') && (
+                            <Box xcss={{
+                              background: '#fff3e0',
+                              padding: 'space.100',
+                              borderRadius: 'border.radius.050',
+                              marginTop: 'space.100',
+                              border: '1px solid #ff9800'
+                            }}>
+                              <Text xcss={{ fontSize: '0.8em', color: '#f57c00' }}>
+                                ⚠️ User not found in Jira - task will be unassigned
+                              </Text>
+                            </Box>
+                          )}
                         </Box>
                       ))}
                     </Stack>
+                    
+                    {/* Bulk Operations */}
+                    <Box xcss={{
+                      background: '#f0f4f8',
+                      padding: 'space.300',
+                      borderRadius: 'border.radius.200',
+                      border: '1px solid #cbd5e0'
+                    }}>
+                      <Text xcss={{ fontWeight: '700', marginBottom: 'space.200' }}>⚡ Quick Actions:</Text>
+                      <Box xcss={{ display: 'flex', gap: 'space.200', flexWrap: 'wrap' }}>
+                        <Button 
+                          appearance="subtle" 
+                          xcss={{ fontSize: '0.8em', padding: 'space.050 space.150' }}
+                          onClick={() => {
+                            const updatedTasks = extractedTasks.map(task => ({
+                              ...task,
+                              dueDate: task.dueDate === 'No due date' ? '2025-12-27' : task.dueDate
+                            }));
+                            setExtractedTasks(updatedTasks);
+                          }}
+                        >
+                          📅 Set Missing Due Dates to Friday
+                        </Button>
+                        <Button 
+                          appearance="subtle" 
+                          xcss={{ fontSize: '0.8em', padding: 'space.050 space.150' }}
+                          onClick={() => {
+                            const updatedTasks = extractedTasks.map(task => ({
+                              ...task,
+                              priority: task.priority === 'Low' ? 'Medium' : task.priority
+                            }));
+                            setExtractedTasks(updatedTasks);
+                          }}
+                        >
+                          ⬆️ Boost Low Priority Tasks
+                        </Button>
+                      </Box>
+                    </Box>
                   </>
                 )}
                 
