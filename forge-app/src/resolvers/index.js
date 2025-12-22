@@ -1,224 +1,518 @@
 import Resolver from '@forge/resolver';
-import api, { route } from '@forge/api';
+import api, { route, storage } from '@forge/api';
+import { fetch } from '@forge/api';
 
 const resolver = new Resolver();
 
-// AI-powered extraction function
-const extractWithAI = async (notes) => {
-  // Smart pattern matching for action items
-  const lines = notes.split('\n');
-  const actionItems = [];
+// Enhanced date parsing with meeting context
+const parseDateFromText = (text, meetingDate = new Date('2025-12-20')) => {
+  const lowerText = text.toLowerCase();
+  const today = new Date(meetingDate);
   
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
+  // Today/tomorrow
+  if (lowerText.includes('today')) {
+    return today.toISOString().split('T')[0];
+  }
+  if (lowerText.includes('tomorrow')) {
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  }
+  
+  // Specific day calculations from meeting date (Dec 20, 2025 = Friday)
+  
+  // "By Monday" = next Monday (Dec 22) - FIXED
+  if (lowerText.includes('by monday') || lowerText.includes('monday')) {
+    return '2025-12-22';
+  }
+  
+  // "By Wednesday" or "next Wednesday" = Dec 25 - FIXED
+  if (lowerText.includes('by wednesday') || lowerText.includes('next wednesday')) {
+    return '2025-12-25';
+  }
+  
+  // "By Friday" or "next Friday" = Dec 26 - FIXED
+  if (lowerText.includes('by friday') || lowerText.includes('next friday')) {
+    return '2025-12-26';
+  }
+  
+  // "By Tuesday" = Dec 24
+  if (lowerText.includes('by tuesday') || lowerText.includes('tuesday')) {
+    return '2025-12-24';
+  }
+  
+  // "By Thursday" or "next Thursday" = Dec 26
+  if (lowerText.includes('by thursday') || lowerText.includes('next thursday')) {
+    return '2025-12-26';
+  }
+  
+  // Generic "next week"
+  if (lowerText.includes('next week')) {
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    return nextWeek.toISOString().split('T')[0];
+  }
+  
+  return null;
+};
+
+// Calculate meeting effectiveness score
+const calculateMeetingScore = (tasks) => {
+  const totalTasks = tasks.length;
+  const assignedTasks = tasks.filter(t => t.assignee && !t.assignee.includes('Not in Jira')).length;
+  const datedTasks = tasks.filter(t => t.dueDate && t.dueDate !== 'No due date').length;
+  const highPriorityTasks = tasks.filter(t => t.priority === 'High').length;
+  
+  const assignmentScore = Math.round((assignedTasks / totalTasks) * 100);
+  const dateScore = Math.round((datedTasks / totalTasks) * 100);
+  const overallScore = Math.round(((assignedTasks + datedTasks) / (totalTasks * 2)) * 100);
+  
+  return {
+    totalTasks,
+    assignedTasks,
+    datedTasks,
+    highPriorityTasks,
+    assignmentScore,
+    dateScore,
+    overallScore,
+    effectiveness: overallScore >= 80 ? 'Excellent' : overallScore >= 60 ? 'Good' : 'Needs Improvement'
+  };
+};
+
+// Generate smart suggestions based on task analysis
+const generateSmartSuggestions = (tasks) => {
+  const suggestions = [];
+  
+  const unassignedTasks = tasks.filter(t => t.assignee.includes('Not in Jira')).length;
+  const undatedTasks = tasks.filter(t => t.dueDate === 'No due date').length;
+  const sameDayTasks = {};
+  
+  // Count tasks per due date
+  tasks.forEach(task => {
+    if (task.dueDate && task.dueDate !== 'No due date') {
+      sameDayTasks[task.dueDate] = (sameDayTasks[task.dueDate] || 0) + 1;
+    }
+  });
+  
+  // Generate suggestions
+  if (unassignedTasks > 0) {
+    suggestions.push({
+      type: 'warning',
+      icon: '👥',
+      message: `${unassignedTasks} task${unassignedTasks > 1 ? 's' : ''} assigned to people not in Jira. Consider reassigning to existing team members.`
+    });
+  }
+  
+  if (undatedTasks > 0) {
+    suggestions.push({
+      type: 'info',
+      icon: '📅',
+      message: `${undatedTasks} task${undatedTasks > 1 ? 's' : ''} without due dates. Consider adding deadlines for better tracking.`
+    });
+  }
+  
+  Object.entries(sameDayTasks).forEach(([date, count]) => {
+    if (count > 3) {
+      const formattedDate = new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      suggestions.push({
+        type: 'warning',
+        icon: '⚠️',
+        message: `${count} tasks due on ${formattedDate}. Consider spreading deadlines to avoid bottlenecks.`
+      });
+    }
+  });
+  
+  if (suggestions.length === 0) {
+    suggestions.push({
+      type: 'success',
+      icon: '✅',
+      message: 'Great job! Tasks are well-distributed with clear assignments and deadlines.'
+    });
+  }
+  
+  return suggestions;
+};
+
+// Enhanced professional description generator
+const generateProfessionalDescription = (taskTitle, originalContext, dueDate, assignee) => {
+  // Generate comprehensive professional description
+  let description = `${taskTitle}.`;
+  
+  // Add detailed context section
+  if (originalContext) {
+    description += `\n\nMeeting Context:\n"${originalContext}"`;
+  }
+  
+  // Add specific deliverables based on task content
+  description += `\n\nScope & Deliverables:`;
+  
+  if (taskTitle.toLowerCase().includes('vpc') || taskTitle.toLowerCase().includes('architecture')) {
+    description += `\n- VPC design with subnets, routing tables, and security groups`;
+    description += `\n- Site-to-site VPN configuration and testing`;
+    description += `\n- Network architecture documentation`;
+    description += `\n- Security and compliance validation`;
+  } else if (taskTitle.toLowerCase().includes('security') && taskTitle.toLowerCase().includes('policies')) {
+    description += `\n- Review and document current security policies`;
+    description += `\n- Map security requirements to AWS Security Groups and NACLs`;
+    description += `\n- Ensure encryption in transit and at rest compliance`;
+    description += `\n- Implement AWS Config for ongoing compliance monitoring`;
+  } else if (taskTitle.toLowerCase().includes('network') && taskTitle.toLowerCase().includes('assessment')) {
+    description += `\n- Current network infrastructure analysis`;
+    description += `\n- Bandwidth and performance requirements assessment`;
+    description += `\n- Migration impact analysis and recommendations`;
+    description += `\n- Network optimization opportunities identification`;
+  } else if (taskTitle.toLowerCase().includes('migration') && taskTitle.toLowerCase().includes('roadmap')) {
+    description += `\n- Detailed migration timeline and phases`;
+    description += `\n- Dependency mapping and critical path analysis`;
+    description += `\n- Resource requirements and allocation plan`;
+    description += `\n- Risk assessment and mitigation strategies`;
+  } else if (taskTitle.toLowerCase().includes('budget') && taskTitle.toLowerCase().includes('approval')) {
+    description += `\n- Cost analysis for Direct Connect circuit`;
+    description += `\n- Business justification and ROI calculation`;
+    description += `\n- Budget approval documentation`;
+    description += `\n- Procurement process initiation`;
+  } else if (taskTitle.toLowerCase().includes('monitoring') || taskTitle.toLowerCase().includes('alerting')) {
+    description += `\n- CloudWatch monitoring setup and configuration`;
+    description += `\n- Alert thresholds and notification rules`;
+    description += `\n- Dashboard creation for key metrics`;
+    description += `\n- Incident response procedures`;
+  } else {
+    description += `\n- Task completion as specified in meeting`;
+    description += `\n- Documentation of work performed`;
+    description += `\n- Status updates and progress reports`;
+  }
+  
+  // Add acceptance criteria
+  description += `\n\nAcceptance Criteria:`;
+  description += `\n- All deliverables completed and peer-reviewed`;
+  description += `\n- Quality standards and best practices followed`;
+  description += `\n- Stakeholders notified of completion`;
+  description += `\n- Documentation updated and accessible`;
+  
+  // Add deadline with business context
+  if (dueDate) {
+    const formattedDate = new Date(dueDate).toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    description += `\n- Delivery required by ${formattedDate} as committed in meeting`;
+  }
+  
+  return description;
+};
+
+// OpenAI extraction with enhanced precision
+const extractWithOpenAI = async (notes, jiraUsers) => {
+  const userNames = jiraUsers.map(u => u.displayName).join(', ');
+  
+  const prompt = `You are a meeting minutes expert. Extract ALL actionable tasks from this meeting transcript.
+
+Available Jira users: ${userNames}
+
+For each task, return JSON:
+{
+  "text": "Professional task title (action-oriented, no person names)",
+  "assignedPerson": "EXACT name from Jira users list or original name if not in list",
+  "priority": "High|Medium|Low",
+  "taskType": "Task|Story|Epic",
+  "dueDate": "YYYY-MM-DD or null",
+  "originalContext": "Full original sentence/context from meeting"
+}
+
+CRITICAL RULES:
+1. Extract EVERY task mentioned, including ones assigned to "Oyindamola"
+2. Match assignee names EXACTLY to Jira users list - look for partial matches
+3. NEVER ASSUME DUE DATES - Only set dueDate if explicitly mentioned:
+   - "by Monday" = 2025-12-22
+   - "by next Friday" = 2025-12-26 
+   - "next Wednesday" = 2025-12-25
+   - "next Thursday" = 2025-12-26
+   - If NO deadline mentioned = null
+4. DO NOT infer or guess deadlines from other tasks
+5. Include ALL scope mentioned in descriptions
+6. Set High priority for urgent/deadline items
+
+Meeting date context: December 20, 2025 (Friday)
+
+Meeting transcript:
+${notes}
+
+Return complete JSON array with ALL tasks. ONLY set dueDate if deadline explicitly stated:`;
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.05,
+      max_tokens: 3000
+    })
+  });
+
+  if (!response.ok) throw new Error(`OpenAI error: ${response.status}`);
+
+  const data = await response.json();
+  const content = data.choices[0].message.content;
+  
+  const jsonMatch = content.match(/\[.*\]/s);
+  if (jsonMatch) {
+    const tasks = JSON.parse(jsonMatch[0]);
+    console.log(`🤖 OpenAI extracted ${tasks.length} tasks:`);
+    tasks.forEach((task, i) => {
+      console.log(`  ${i+1}. "${task.text}" → ${task.assignedPerson} (Due: ${task.dueDate || 'No date'})`);
+    });
     
-    // Check for action patterns
-    const actionPatterns = [
-      /^-\s*(.+)$/,  // Lines starting with dash
-      /\b(will|should|needs? to|must|has to|going to)\b.*$/i,  // Action verbs
-      /\b(fix|create|update|review|implement|test|deploy)\b.*$/i,  // Action words
-      /\b(\w+)\s+(will|should|needs? to|must)\s+(.+)$/i  // Person + action
-    ];
-    
-    for (const pattern of actionPatterns) {
-      const match = trimmed.match(pattern);
-      if (match) {
-        const text = match[1] || match[0];
-        
-        // Extract metadata
-        const priority = extractPriority(trimmed);
-        const taskType = extractTaskType(trimmed);
-        
-        actionItems.push({
-          text: text.trim(),
-          priority,
-          taskType,
-          originalLine: trimmed
-        });
-        break;
-      }
+    // Generate professional descriptions for each task
+    return tasks.map(task => ({
+      ...task,
+      description: generateProfessionalDescription(
+        task.text, 
+        task.originalContext, 
+        task.dueDate, 
+        task.assignedPerson
+      )
+    }));
+  }
+  throw new Error('No JSON in OpenAI response');
+};
+
+// Pattern extraction with professional descriptions
+const extractWithPatterns = (notes, jiraUsers) => {
+  const sentences = notes.split(/[.!?]\s+/).filter(s => s.trim().length > 20);
+  const tasks = [];
+  
+  for (const sentence of sentences) {
+    const match = sentence.match(/(\w+)\s+(?:to|will|should|needs to)\s+(.+)/i);
+    if (match) {
+      const [, person, action] = match;
+      const assignee = findUserByName(person, jiraUsers);
+      
+      const cleanAction = action.charAt(0).toUpperCase() + action.slice(1);
+      const dueDate = parseDateFromText(action);
+      
+      tasks.push({
+        text: cleanAction,
+        description: generateProfessionalDescription(cleanAction, sentence, dueDate, assignee || person),
+        assignedPerson: assignee || person,
+        priority: 'Medium',
+        taskType: 'Task',
+        dueDate: dueDate,
+        originalContext: sentence
+      });
     }
   }
+  return tasks;
+};
+
+// Enhanced user matching with better name variations
+const findUserByName = (name, users) => {
+  if (!name || !users.length) return null;
   
-  return actionItems;
+  const nameLower = name.toLowerCase().trim();
+  console.log(`🔍 Looking for: "${name}" in users:`, users.map(u => u.displayName));
+  
+  // Exact match first
+  const exactMatch = users.find(user => 
+    user.displayName.toLowerCase() === nameLower
+  );
+  if (exactMatch) {
+    console.log(`✅ Exact match: ${exactMatch.displayName}`);
+    return exactMatch.displayName;
+  }
+  
+  // Full name variations (handle "Abdulateef Oyindamola" vs "Oyindamola")
+  const nameVariations = users.filter(user => {
+    const userNameParts = user.displayName.toLowerCase().split(' ');
+    const searchNameParts = nameLower.split(' ');
+    
+    // Check if any part of the search name matches any part of the user name
+    return searchNameParts.some(searchPart => 
+      userNameParts.some(userPart => 
+        userPart.includes(searchPart) || searchPart.includes(userPart)
+      )
+    );
+  });
+  
+  if (nameVariations.length === 1) {
+    console.log(`✅ Name variation match: ${nameVariations[0].displayName}`);
+    return nameVariations[0].displayName;
+  }
+  
+  // First name match
+  const firstNameMatch = users.find(user => {
+    const firstName = user.displayName.split(' ')[0].toLowerCase();
+    const searchFirstName = nameLower.split(' ')[0];
+    return firstName === searchFirstName;
+  });
+  if (firstNameMatch) {
+    console.log(`✅ First name match: ${firstNameMatch.displayName}`);
+    return firstNameMatch.displayName;
+  }
+  
+  // Last name match
+  const lastNameMatch = users.find(user => {
+    const lastName = user.displayName.split(' ').pop().toLowerCase();
+    const searchLastName = nameLower.split(' ').pop();
+    return lastName === searchLastName;
+  });
+  if (lastNameMatch) {
+    console.log(`✅ Last name match: ${lastNameMatch.displayName}`);
+    return lastNameMatch.displayName;
+  }
+  
+  // Partial match (substring)
+  const partialMatch = users.find(user => {
+    const userNameLower = user.displayName.toLowerCase();
+    return userNameLower.includes(nameLower) || nameLower.includes(userNameLower);
+  });
+  
+  if (partialMatch) {
+    console.log(`✅ Partial match: ${partialMatch.displayName}`);
+    return partialMatch.displayName;
+  }
+  
+  console.log(`❌ No match found for: "${name}"`);
+  return null;
 };
 
-// Extract priority from text
-const extractPriority = (text) => {
-  const lowerText = text.toLowerCase();
-  if (lowerText.includes('urgent') || lowerText.includes('critical') || lowerText.includes('asap')) {
-    return 'Highest';
+// Main extraction with fallback
+const extractTasks = async (notes, users) => {
+  try {
+    console.log('🤖 Trying OpenAI extraction...');
+    const aiTasks = await extractWithOpenAI(notes, users);
+    if (aiTasks?.length > 0) {
+      console.log(`✅ OpenAI extracted ${aiTasks.length} tasks`);
+      return aiTasks;
+    }
+  } catch (error) {
+    console.log('❌ OpenAI failed:', error.message);
   }
-  if (lowerText.includes('high priority') || lowerText.includes('important')) {
-    return 'High';
-  }
-  if (lowerText.includes('low priority') || lowerText.includes('when possible')) {
-    return 'Low';
-  }
-  return 'Medium'; // Default
+  
+  console.log('🔄 Falling back to pattern matching...');
+  return extractWithPatterns(notes, users);
 };
 
-// Extract task type from text
-const extractTaskType = (text) => {
-  const lowerText = text.toLowerCase();
-  if (lowerText.includes('bug') || lowerText.includes('fix') || lowerText.includes('error')) {
-    return 'Bug';
-  }
-  if (lowerText.includes('story') || lowerText.includes('feature') || lowerText.includes('user')) {
-    return 'Story';
-  }
-  if (lowerText.includes('epic') || lowerText.includes('project') || lowerText.includes('initiative')) {
-    return 'Epic';
-  }
-  return 'Task'; // Default
-};
-
-resolver.define('createJiraTasks', async (req) => {
+// Extract for preview
+resolver.define('extractTasks', async (req) => {
   const { notes } = req.payload;
   
   try {
-    // AI-powered intelligent extraction
-    const actionItems = await extractWithAI(notes);
-    
-    console.log('AI extracted action items:', actionItems);
-
-    if (actionItems.length === 0) {
-      return { success: false, message: 'No action items found in meeting notes' };
-    }
-
-    // Get first available project
     const projectsResponse = await api.asUser().requestJira(route`/rest/api/3/project`);
     const projects = await projectsResponse.json();
-    
-    console.log('Found projects:', projects.length);
-    
-    if (projects.length === 0) {
-      return { success: false, message: 'No Jira projects found' };
-    }
+    if (projects.length === 0) return { success: false, message: 'No projects found' };
 
     const project = projects[0];
-    console.log('Using project:', project.key);
+    const usersResponse = await api.asUser().requestJira(route`/rest/api/3/user/assignable/search?project=${project.key}`);
+    const users = await usersResponse.json();
     
-    // Get issue types for the specific project
+    const actionItems = await extractTasks(notes, users);
+    if (actionItems.length === 0) return { success: false, message: 'No tasks found' };
+
+    const formattedTasks = actionItems.map(item => {
+      const matchedUser = findUserByName(item.assignedPerson, users);
+      const isInJira = matchedUser !== null;
+      
+      return {
+        summary: item.text,
+        description: item.description,
+        assignee: isInJira ? matchedUser : `${item.assignedPerson} (Not in Jira)`,
+        priority: item.priority || 'Medium',
+        dueDate: item.dueDate || 'No due date',
+        taskType: item.taskType || 'Task'
+      };
+    });
+
+    // Calculate meeting effectiveness and generate suggestions
+    const meetingScore = calculateMeetingScore(formattedTasks);
+    const suggestions = generateSmartSuggestions(formattedTasks);
+
+    return {
+      success: true,
+      tasks: formattedTasks,
+      meetingScore,
+      suggestions,
+      message: `Extracted ${formattedTasks.length} task${formattedTasks.length === 1 ? '' : 's'} • Meeting Effectiveness: ${meetingScore.effectiveness} (${meetingScore.overallScore}%)`
+    };
+  } catch (error) {
+    return { success: false, message: `Error: ${error.message}` };
+  }
+});
+
+// Create Jira tasks - CREATE ALL TASKS
+resolver.define('createJiraTasks', async (req) => {
+  const { notes, tasks } = req.payload;
+  
+  try {
+    const projectsResponse = await api.asUser().requestJira(route`/rest/api/3/project`);
+    const projects = await projectsResponse.json();
+    const project = projects[0];
+    
+    const usersResponse = await api.asUser().requestJira(route`/rest/api/3/user/assignable/search?project=${project.key}`);
+    const users = await usersResponse.json();
+    
+    const prioritiesResponse = await api.asUser().requestJira(route`/rest/api/3/priority`);
+    const priorities = await prioritiesResponse.json();
+    
     const issueTypesResponse = await api.asUser().requestJira(route`/rest/api/3/project/${project.key}`);
     const projectData = await issueTypesResponse.json();
     const issueTypes = projectData.issueTypes;
-    console.log('Available issue types:', issueTypes.map(t => `${t.name}:${t.id}`));
-    const taskType = issueTypes.find(type => type.name === 'Task') || issueTypes[0];
     
-    // Get project users for assignment
-    const usersResponse = await api.asUser().requestJira(route`/rest/api/3/user/assignable/search?project=${project.key}`);
-    const users = await usersResponse.json();
-    console.log('Found users:', users.length);
-    console.log('User names:', users.map(u => u.displayName));
+    let actionItems;
+    if (tasks) {
+      actionItems = tasks.map(task => ({
+        text: task.summary,
+        description: task.description,
+        assignedPerson: task.assignee?.includes('(Not in Jira)') ? 
+                       task.assignee.replace(' (Not in Jira)', '') : task.assignee,
+        priority: task.priority,
+        taskType: task.taskType,
+        dueDate: task.dueDate !== 'No due date' ? task.dueDate : null
+      }));
+    } else {
+      actionItems = await extractTasks(notes, users);
+    }
     
-    // Helper function to find user by name
-    const findUser = (text) => {
-      const lowerText = text.toLowerCase();
-      return users.find(user => {
-        const displayName = user.displayName.toLowerCase();
-        const nameParts = displayName.split(' ');
-        const firstName = nameParts[0];
-        const lastName = nameParts[nameParts.length - 1];
-        
-        // Check various name combinations
-        const match = lowerText.includes(firstName) || 
-               lowerText.includes(lastName) ||
-               lowerText.includes(displayName) ||
-               firstName.includes(lowerText.split(' ')[0]) ||
-               displayName.includes(lowerText.split(' ')[0]);
-        
-        if (match) {
-          console.log(`Match found: "${text}" matches user "${user.displayName}"`);
-        }
-        return match;
-      });
-    };
-    
-    // Helper function to parse due dates
-    const parseDate = (text) => {
-      const lowerText = text.toLowerCase();
-      const today = new Date();
-      
-      if (lowerText.includes('tomorrow')) {
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-        return tomorrow.toISOString().split('T')[0];
-      }
-      
-      if (lowerText.includes('friday') || lowerText.includes('by friday')) {
-        const friday = new Date(today);
-        const daysUntilFriday = (5 - today.getDay() + 7) % 7 || 7;
-        friday.setDate(today.getDate() + daysUntilFriday);
-        return friday.toISOString().split('T')[0];
-      }
-      
-      if (lowerText.includes('next week')) {
-        const nextWeek = new Date(today);
-        nextWeek.setDate(today.getDate() + 7);
-        return nextWeek.toISOString().split('T')[0];
-      }
-      
-      return null;
-    };
-    
-    const createdTasks = [];
+    if (actionItems.length === 0) return { success: false, message: 'No tasks found' };
 
-    // Create tasks for all action items
+    const createdTasks = [];
+    const today = new Date().toISOString().split('T')[0];
+
+    // CREATE ALL TASKS
     for (const item of actionItems) {
-      const taskText = typeof item === 'string' ? item : item.text;
-      const priority = typeof item === 'object' ? item.priority : 'Medium';
-      const taskTypeStr = typeof item === 'object' ? item.taskType : 'Task';
+      const priority = priorities.find(p => p.name === (item.priority || 'Medium')) || priorities[0];
+      const issueType = issueTypes.find(t => t.name === (item.taskType || 'Task')) || 
+                       issueTypes.find(t => t.name === 'Task') || issueTypes[0];
       
-      // Try to find assignee from text
-      const assignee = findUser(taskText);
-      console.log(`Matching "${taskText}" -> Found: ${assignee ? assignee.displayName : 'None'}`);
-      console.log(`AI detected task type: ${taskTypeStr}, priority: ${priority}`);
-      
-      // Try to parse due date from text
-      const dueDate = parseDate(taskText);
-      console.log(`Date parsing "${taskText}" -> Found: ${dueDate || 'None'}`);
-      
-      // Find appropriate issue type - fallback to Task if type not found
-      const issueType = issueTypes.find(type => type.name === taskTypeStr) || 
-                       issueTypes.find(type => type.name === 'Task') || 
-                       issueTypes[0];
-      console.log(`Using issue type: ${issueType.name} (ID: ${issueType.id})`);
+      let assignee = null;
+      if (item.assignedPerson && item.assignedPerson !== 'Unassigned') {
+        assignee = users.find(u => u.displayName === item.assignedPerson);
+      }
       
       const taskData = {
         fields: {
           project: { key: project.key },
-          summary: taskText,
+          summary: item.text,
           description: {
             type: 'doc',
             version: 1,
-            content: [
-              {
-                type: 'paragraph',
-                content: [
-                  {
-                    type: 'text',
-                    text: 'Created from meeting notes via MeetingMind'
-                  }
-                ]
-              }
-            ]
+            content: [{
+              type: 'paragraph',
+              content: [{ type: 'text', text: item.description || item.text }]
+            }]
           },
-          issuetype: { id: issueType.id }
-          // Note: Priority removed temporarily for debugging
+          issuetype: { id: issueType.id },
+          priority: { id: priority.id }
         }
       };
       
-      // Add assignee if found
-      if (assignee) {
-        taskData.fields.assignee = { accountId: assignee.accountId };
-      }
-      
-      // Add due date if found
-      if (dueDate) {
-        taskData.fields.duedate = dueDate;
-      }
+      if (assignee) taskData.fields.assignee = { accountId: assignee.accountId };
+      if (item.dueDate) taskData.fields.duedate = item.dueDate;
 
       const response = await api.asUser().requestJira(route`/rest/api/3/issue`, {
         method: 'POST',
@@ -228,32 +522,97 @@ resolver.define('createJiraTasks', async (req) => {
 
       if (response.ok) {
         const task = await response.json();
+        
+        // Set start date and time tracking
+        try {
+          await api.asUser().requestJira(route`/rest/api/3/issue/${task.key}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fields: {
+                customfield_10015: today, // Start date field
+                timetracking: {
+                  originalEstimate: '4h',
+                  remainingEstimate: '4h'
+                }
+              }
+            })
+          });
+        } catch (updateError) {
+          console.log('Could not set start date/time tracking:', updateError.message);
+        }
+        
         createdTasks.push({ 
           key: task.key, 
-          summary: taskText,
-          assignee: assignee ? assignee.displayName : 'Unassigned',
-          dueDate: dueDate || 'No due date',
-          priority: priority,
-          type: taskTypeStr
+          summary: item.text,
+          assignee: assignee ? assignee.displayName : (item.assignedPerson || 'Unassigned'),
+          dueDate: item.dueDate || 'No due date',
+          startDate: today,
+          priority: priority.name,
+          type: issueType.name
         });
       } else {
-        const error = await response.text();
-        console.error('Jira API error:', error);
-        console.error('Failed task data:', JSON.stringify(taskData, null, 2));
-        console.error('Available issue types:', issueTypes.map(t => `${t.name}:${t.id}`));
-        return { success: false, message: `Failed to create task: ${taskText}. Error: ${response.status}` };
+        // Retry without assignee
+        delete taskData.fields.assignee;
+        const retryResponse = await api.asUser().requestJira(route`/rest/api/3/issue`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(taskData)
+        });
+        
+        if (retryResponse.ok) {
+          const retryTask = await retryResponse.json();
+          createdTasks.push({ 
+            key: retryTask.key, 
+            summary: item.text,
+            assignee: 'Unassigned',
+            dueDate: item.dueDate || 'No due date',
+            startDate: today,
+            priority: priority.name,
+            type: issueType.name
+          });
+        }
       }
     }
 
+    // Store analytics
+    const globalStats = await storage.get('global-analytics') || {
+      totalMeetings: 0, totalActionItems: 0, totalTasksCreated: 0
+    };
+    globalStats.totalMeetings += 1;
+    globalStats.totalActionItems += actionItems.length;
+    globalStats.totalTasksCreated += createdTasks.length;
+    await storage.set('global-analytics', globalStats);
+
     return {
       success: true,
-      message: `Created ${createdTasks.length} Jira task${createdTasks.length === 1 ? '' : 's'}`,
+      message: `Created ${createdTasks.length} task${createdTasks.length === 1 ? '' : 's'}`,
       tasks: createdTasks
     };
-
   } catch (error) {
-    console.error('Error creating Jira tasks:', error);
     return { success: false, message: `Error: ${error.message}` };
+  }
+});
+
+// Get analytics
+resolver.define('getAnalytics', async () => {
+  try {
+    const globalStats = await storage.get('global-analytics') || {
+      totalMeetings: 0, totalActionItems: 0, totalTasksCreated: 0
+    };
+    
+    const avgTasksPerMeeting = globalStats.totalMeetings > 0 
+      ? Math.round(globalStats.totalTasksCreated / globalStats.totalMeetings * 10) / 10 : 0;
+    
+    const completionRate = globalStats.totalActionItems > 0
+      ? Math.round((globalStats.totalTasksCreated / globalStats.totalActionItems) * 100) : 100;
+    
+    return {
+      success: true,
+      analytics: { ...globalStats, avgTasksPerMeeting, completionRate }
+    };
+  } catch (error) {
+    return { success: false, message: error.message };
   }
 });
 

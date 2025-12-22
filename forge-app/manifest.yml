@@ -5,11 +5,13 @@ modules:
       render: native
       resolver:
         function: resolver
-      title: MeetingMind
-      description: Transform meeting notes into Jira tasks automatically
+      title: MeetingMind - Meeting Intelligence
+      description: Transform meeting notes into Jira tasks with AI-powered extraction
+
   function:
     - key: resolver
       handler: index.handler
+
 resources:
   - key: main
     path: src/frontend/index.jsx
@@ -17,11 +19,17 @@ permissions:
   scopes:
     - read:confluence-content.all
     - write:confluence-content
+    - write:custom-content:confluence
     - read:confluence-space.summary
     - read:confluence-user
     - write:jira-work
     - read:jira-work
     - read:jira-user
+    - storage:app
+  external:
+    fetch:
+      backend:
+        - address: https://api.openai.com
 app:
   runtime:
     name: nodejs22.x
