@@ -1,0 +1,23 @@
+{
+  "ui": {
+    "setDueDate": "Set due date",
+    "edit": "Edit",
+    "priority": "Priority",
+    "assignee": "Assignee",
+    "due": "Due",
+    "notInJira": "Not in Jira",
+    "task": "Task",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "smartSuggestions": "Smart Suggestions",
+    "discard": "Discard",
+    "editNotes": "Edit Notes",
+    "approveCreate": "Approve & Create",
+    "created": "Created",
+    "tasks": "tasks",
+    "createdTasks": "Created tasks:",
+    "start": "Start",
+    "noDueDate": "No due date"
+  }
+}

@@ -2,6 +2,12 @@
 
 Transform your meeting notes into actionable Jira tasks automatically using advanced AI technology.
 
+## 🎬 Demo Video
+
+[![MeetingMind Demo](https://img.shields.io/badge/▶️_Watch_Demo-YouTube-red?style=for-the-badge&logo=youtube)](YOUR_YOUTUBE_URL_HERE)
+
+> **See MeetingMind in action!** Watch how chaotic meeting notes transform into perfectly organized Jira tasks in just 30 seconds.
+
 ## 🚀 Overview
 
 MeetingMind is an Atlassian Forge application that uses artificial intelligence to extract actionable tasks from meeting transcripts and automatically creates corresponding Jira tickets with proper assignment, priorities, and due dates.
@@ -116,18 +122,214 @@ MeetingMind automatically detects and processes meetings in multiple languages:
 
 All tasks are created in the original meeting language while maintaining proper user assignment.
 
-## 🏗️ Architecture
+## 🏗️ System Architecture
 
-### Two-Tier AI System
-
-1. **OpenAI GPT-3.5-turbo** (Primary): Advanced natural language understanding
-2. **Pattern Matching** (Fallback): Deterministic extraction that always works
-
-### Data Flow
+### High-Level Architecture
 
 ```
-Meeting Notes → Language Detection → AI Extraction → User Matching → Jira Task Creation
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Confluence    │    │   MeetingMind    │    │      Jira       │
+│     Macro       │◄──►│  Forge App       │◄──►│   Workspace     │
+│   (Frontend)    │    │   (Backend)      │    │   (Tasks)       │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                              │
+                              ▼
+                       ┌──────────────┐
+                       │   OpenAI     │
+                       │  GPT-3.5     │
+                       │   Turbo      │
+                       └──────────────┘
 ```
+
+### Component Architecture
+
+#### 1. **Frontend Layer** (`src/frontend/index.jsx`)
+- **Technology**: React with Forge UI Kit
+- **Components**:
+  - Meeting notes input textarea
+  - Task preview modal with individual controls
+  - Meeting effectiveness dashboard
+  - Smart suggestions panel
+- **State Management**: React hooks for UI state
+- **Styling**: CSS-in-JS with Jira design tokens
+
+#### 2. **Backend Layer** (`src/resolvers/index.js`)
+- **Technology**: Node.js with Forge Resolver
+- **Core Functions**:
+  - `extractTasks()`: Main AI extraction orchestrator
+  - `createJiraTasks()`: Jira API integration
+  - `getJiraUsers()`: User matching and validation
+  - `calculateMeetingEffectiveness()`: Analytics engine
+
+#### 3. **Two-Tier AI System**
+
+**Tier 1: OpenAI GPT-3.5-turbo** (Primary)
+```javascript
+// Structured prompt engineering for task extraction
+const prompt = `Extract actionable tasks from meeting notes:
+- Task description
+- Assignee name
+- Due date (natural language)
+- Priority level
+- Context and dependencies`;
+```
+
+**Tier 2: Pattern Matching** (Fallback)
+```javascript
+// Regex-based extraction for reliability
+const patterns = {
+  tasks: /(?:needs? to|should|will|must)\s+(.+?)(?=\.|$)/gi,
+  assignees: /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:needs?|should|will)/gi,
+  dates: /(?:by|before|until)\s+(\w+day|tomorrow|next\s+\w+)/gi
+};
+```
+
+### Data Flow Architecture
+
+```
+1. User Input
+   │
+   ▼
+2. Language Detection
+   │ (detectLanguage())
+   ▼
+3. AI Processing Pipeline
+   │
+   ├─► OpenAI GPT-3.5-turbo
+   │   │ (structured extraction)
+   │   ▼
+   │   Success? ──Yes──► Task Objects
+   │   │
+   │   No
+   │   ▼
+   └─► Pattern Matching
+       │ (regex fallback)
+       ▼
+       Task Objects
+   │
+   ▼
+4. User Matching
+   │ (fuzzy name matching)
+   ▼
+5. Date Parsing
+   │ (natural language → ISO dates)
+   ▼
+6. Meeting Analytics
+   │ (effectiveness scoring)
+   ▼
+7. Task Preview
+   │ (user approval workflow)
+   ▼
+8. Jira Integration
+   │ (REST API v3)
+   ▼
+9. Task Creation
+```
+
+### Integration Architecture
+
+#### **Atlassian Forge Platform**
+- **Hosting**: Serverless functions on AWS
+- **Security**: OAuth 2.0 with Atlassian Identity
+- **Permissions**: Scoped API access tokens
+- **Storage**: Forge storage for user preferences
+
+#### **External APIs**
+```yaml
+OpenAI API:
+  endpoint: https://api.openai.com/v1/chat/completions
+  model: gpt-3.5-turbo
+  authentication: Bearer token
+  rate_limits: 3500 RPM, 90000 TPM
+
+Jira REST API v3:
+  endpoints:
+    - /rest/api/3/issue (create tasks)
+    - /rest/api/3/users/search (user lookup)
+    - /rest/api/3/project (project validation)
+  authentication: Forge context token
+
+Confluence API:
+  endpoints:
+    - /wiki/rest/api/content (page context)
+    - /wiki/rest/api/user (user context)
+  authentication: Forge context token
+```
+
+### Security Architecture
+
+#### **Data Protection**
+- Meeting notes processed in-memory only
+- No persistent storage of sensitive content
+- OpenAI API calls over HTTPS with encryption
+- Forge platform provides SOC 2 compliance
+
+#### **Access Control**
+- User-scoped permissions via Atlassian Identity
+- API rate limiting and request validation
+- Input sanitization for XSS prevention
+- CSRF protection via Forge framework
+
+### Scalability Architecture
+
+#### **Performance Optimizations**
+- Concurrent API calls for user lookup
+- Debounced input processing
+- Lazy loading of Jira projects
+- Efficient regex compilation
+
+#### **Error Handling**
+```javascript
+// Graceful degradation strategy
+if (openAIFails) {
+  fallbackToPatternMatching();
+}
+if (userNotFound) {
+  showUserSelectionDropdown();
+}
+if (jiraAPIFails) {
+  showRetryWithExponentialBackoff();
+}
+```
+
+### Multi-Language Architecture
+
+#### **Language Detection**
+```javascript
+const detectLanguage = (text) => {
+  const patterns = {
+    spanish: /\b(necesita|debe|va a|tiene que)\b/i,
+    french: /\b(doit|va|besoin de|faut)\b/i,
+    german: /\b(muss|soll|wird|braucht)\b/i
+  };
+  // Returns: 'en', 'es', 'fr', 'de'
+};
+```
+
+#### **Localized Processing**
+- Language-specific regex patterns
+- Cultural date format parsing
+- Native language task creation
+- Timezone-aware due date calculation
+
+### Deployment Architecture
+
+```
+Development Environment
+├── Local development (forge tunnel)
+├── Hot reloading for frontend changes
+└── Local Atlassian instance testing
+
+Production Environment
+├── Atlassian Forge Cloud (AWS)
+├── Global CDN distribution
+├── Auto-scaling serverless functions
+└── 99.9% uptime SLA
+```
+
+**App ID**: `ari:cloud:ecosystem::app/3a2641df-663e-45e7-8134-b9dc728cbf7d`  
+**Version**: 2.0.0 (Production)  
+**Region**: Global (Multi-region deployment)
 
 ## 🔧 Configuration
 

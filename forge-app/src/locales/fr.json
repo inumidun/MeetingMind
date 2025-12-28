@@ -1,0 +1,23 @@
+{
+  "ui": {
+    "setDueDate": "Définir échéance",
+    "edit": "Modifier",
+    "priority": "Priorité",
+    "assignee": "Assigné à",
+    "due": "Échéance",
+    "notInJira": "Pas dans Jira",
+    "task": "Tâche",
+    "high": "Élevée",
+    "medium": "Moyenne",
+    "low": "Faible",
+    "smartSuggestions": "Suggestions Intelligentes",
+    "discard": "Rejeter",
+    "editNotes": "Modifier Notes",
+    "approveCreate": "Approuver & Créer",
+    "created": "Créé",
+    "tasks": "tâches",
+    "createdTasks": "Tâches créées:",
+    "start": "Début",
+    "noDueDate": "Pas d'échéance"
+  }
+}
