@@ -1,0 +1,23 @@
+{
+  "ui": {
+    "setDueDate": "Fälligkeitsdatum setzen",
+    "edit": "Bearbeiten",
+    "priority": "Priorität",
+    "assignee": "Zugewiesen an",
+    "due": "Fällig",
+    "notInJira": "Nicht in Jira",
+    "task": "Aufgabe",
+    "high": "Hoch",
+    "medium": "Mittel",
+    "low": "Niedrig",
+    "smartSuggestions": "Intelligente Vorschläge",
+    "discard": "Verwerfen",
+    "editNotes": "Notizen bearbeiten",
+    "approveCreate": "Genehmigen & Erstellen",
+    "created": "Erstellt",
+    "tasks": "Aufgaben",
+    "createdTasks": "Erstellte Aufgaben:",
+    "start": "Start",
+    "noDueDate": "Kein Fälligkeitsdatum"
+  }
+}

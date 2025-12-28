@@ -1,0 +1,23 @@
+{
+  "ui": {
+    "setDueDate": "Establecer fecha límite",
+    "edit": "Editar",
+    "priority": "Prioridad",
+    "assignee": "Asignado a",
+    "due": "Vencimiento",
+    "notInJira": "No en Jira",
+    "task": "Tarea",
+    "high": "Alta",
+    "medium": "Media",
+    "low": "Baja",
+    "smartSuggestions": "Sugerencias Inteligentes",
+    "discard": "Descartar",
+    "editNotes": "Editar Notas",
+    "approveCreate": "Aprobar & Crear",
+    "created": "Creado",
+    "tasks": "tareas",
+    "createdTasks": "Tareas creadas:",
+    "start": "Inicio",
+    "noDueDate": "Sin fecha límite"
+  }
+}

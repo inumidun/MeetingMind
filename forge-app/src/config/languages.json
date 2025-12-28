@@ -1,0 +1,30 @@
+{
+  "supportedLanguages": [
+    {
+      "code": "en",
+      "name": "English",
+      "patterns": ["\\b(needs? to|should|will|must)\\b"],
+      "enabled": true
+    },
+    {
+      "code": "fr", 
+      "name": "Français",
+      "patterns": ["\\b(doit|va|besoin de|faut|réviser|mettre à jour)\\b"],
+      "enabled": true
+    },
+    {
+      "code": "es",
+      "name": "Español", 
+      "patterns": ["\\b(necesita|debe|va a|tiene que|revisar|actualizar)\\b"],
+      "enabled": true
+    },
+    {
+      "code": "de",
+      "name": "Deutsch",
+      "patterns": ["\\b(muss|soll|wird|braucht|überprüfen|aktualisieren)\\b"],
+      "enabled": true
+    }
+  ],
+  "defaultLanguage": "en",
+  "fallbackLanguage": "en"
+}
