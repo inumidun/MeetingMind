@@ -4,7 +4,7 @@ Transform your meeting notes into actionable Jira tasks automatically using adva
 
 ## 🎬 Demo Video
 
-[![MeetingMind Demo](https://img.shields.io/badge/▶️_Watch_Demo-YouTube-red?style=for-the-badge&logo=youtube)](YOUR_YOUTUBE_URL_HERE)
+[![MeetingMind Demo](https://img.shields.io/badge/▶️_Watch_Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/3PPURNEzelI?si=PwRI2bFG_F9aRKw1)
 
 > **See MeetingMind in action!** Watch how chaotic meeting notes transform into perfectly organized Jira tasks in just 30 seconds.
 
