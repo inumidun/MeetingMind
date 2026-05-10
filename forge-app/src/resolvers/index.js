@@ -4,59 +4,66 @@ import { fetch } from "@forge/api";
 
 const resolver = new Resolver();
 
-// Enhanced date parsing with meeting context
-const parseDateFromText = (text, meetingDate = new Date("2025-12-20")) => {
+const toIsoDate = (date) => date.toISOString().split("T")[0];
+
+const getNextWeekday = (meetingDate, targetWeekday) => {
+  const date = new Date(meetingDate);
+  const currentWeekday = date.getDay();
+  let daysUntilTarget = (targetWeekday - currentWeekday + 7) % 7;
+
+  if (daysUntilTarget === 0) {
+    daysUntilTarget = 7;
+  }
+
+  date.setDate(date.getDate() + daysUntilTarget);
+  return toIsoDate(date);
+};
+
+// Enhanced date parsing with dynamic meeting context
+const parseDateFromText = (text, meetingDate = new Date()) => {
   const lowerText = text.toLowerCase();
   const today = new Date(meetingDate);
 
   // Today/tomorrow
   if (lowerText.includes("today")) {
-    return today.toISOString().split("T")[0];
+    return toIsoDate(today);
   }
   if (lowerText.includes("tomorrow")) {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    return tomorrow.toISOString().split("T")[0];
+    return toIsoDate(tomorrow);
   }
 
-  // Specific day calculations from meeting date (Dec 20, 2025 = Friday)
-
-  // "By Monday" = next Monday (Dec 22) - FIXED
   if (lowerText.includes("by monday") || lowerText.includes("monday")) {
-    return "2025-12-22";
+    return getNextWeekday(today, 1);
   }
 
-  // "By Wednesday" or "next Wednesday" = Dec 25 - FIXED
   if (
     lowerText.includes("by wednesday") ||
     lowerText.includes("next wednesday")
   ) {
-    return "2025-12-25";
+    return getNextWeekday(today, 3);
   }
 
-  // "By Friday" or "next Friday" = Dec 26 - FIXED
   if (lowerText.includes("by friday") || lowerText.includes("next friday")) {
-    return "2025-12-26";
+    return getNextWeekday(today, 5);
   }
 
-  // "By Tuesday" = Dec 24
   if (lowerText.includes("by tuesday") || lowerText.includes("tuesday")) {
-    return "2025-12-24";
+    return getNextWeekday(today, 2);
   }
 
-  // "By Thursday" or "next Thursday" = Dec 26
   if (
     lowerText.includes("by thursday") ||
     lowerText.includes("next thursday")
   ) {
-    return "2025-12-26";
+    return getNextWeekday(today, 4);
   }
 
-  // Generic "next week"
   if (lowerText.includes("next week")) {
     const nextWeek = new Date(today);
     nextWeek.setDate(today.getDate() + 7);
-    return nextWeek.toISOString().split("T")[0];
+    return toIsoDate(nextWeek);
   }
 
   return null;
@@ -612,18 +619,16 @@ For each task, return JSON:
 CRITICAL RULES:
 1. Extract EVERY task mentioned, including ones assigned to "Oyindamola"
 2. Match assignee names EXACTLY to Jira users list - look for partial matches
-3. NEVER ASSUME DUE DATES - Only set dueDate if explicitly mentioned:
-   - "by Monday" = 2025-12-22
-   - "by next Friday" = 2025-12-26 
-   - "next Wednesday" = 2025-12-25
-   - "next Thursday" = 2025-12-26
-   - If NO deadline mentioned = null
+3. NEVER ASSUME DUE DATES.
+   - Only set dueDate if the transcript explicitly mentions a deadline.
+   - Resolve relative dates such as "by Monday" or "next Friday" using the meeting context in the transcript.
+   - If no deadline is clearly stated, set dueDate to null.
 4. DO NOT infer or guess deadlines from other tasks
 5. Include ALL scope mentioned in descriptions
 6. Set High priority for urgent/deadline items
 7. Keep task titles in the ORIGINAL LANGUAGE of the meeting
 
-Meeting date context: December 20, 2025 (Friday)
+Meeting date context: infer it from the transcript when present; otherwise use the current meeting context conservatively.
 
 Meeting transcript:
 ${notes}
