@@ -8,7 +8,7 @@
   "author": "MeetingMind Team",
   "keywords": ["atlassian", "forge", "jira", "confluence", "ai", "meeting", "automation"],
   "scripts": {
-    "lint": "eslint src/**/*",
+    "lint": "eslint \"src/**/*.{js,jsx}\"",
     "deploy": "forge deploy",
     "install:confluence": "forge install --product confluence",
     "install:jira": "forge install --product jira"

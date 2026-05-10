@@ -41,13 +41,17 @@ DEMO_SCRIPT.md
 IMPROVEMENTS_IMPLEMENTED.md
 SUBMISSION_CHECKLIST.md
 
-# Documentation that shouldn't be public
-docs/
+# Private/local documentation
+docs/private/
+notes/
+scratch/
 
 # Temporary files
 *.tmp
 *.temp
 .cache/
+coverage/
+.eslintcache
 
 # Package manager lock files (optional - uncomment if needed)
 # package-lock.json
