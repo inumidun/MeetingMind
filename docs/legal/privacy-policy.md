@@ -1,6 +1,6 @@
 # MeetingMind Privacy Policy
 
-**Effective Date:** December 2024
+**Effective Date:** December 2025
 
 ## Data Collection
 MeetingMind processes meeting notes you provide to extract actionable tasks. We collect:
